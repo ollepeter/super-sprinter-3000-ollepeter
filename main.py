@@ -18,6 +18,7 @@ HEADER_ROW = ["ID",
 
 
 def read_csv():
+    '''Read csv file and make a create the data table (list of lists)'''
     story_table = []
     with open(csv_file, mode='r', encoding='utf - 8') as f:
         content = csv.reader(f, delimiter=',')
@@ -27,6 +28,7 @@ def read_csv():
 
 
 def write_csv(story_table):
+    '''Write the datatable into csv file csv'''
     with open(csv_file, mode='w', encoding='utf - 8') as f:
         datawriter = csv.writer(f, delimiter=',')
         for row in story_table:
@@ -34,6 +36,7 @@ def write_csv(story_table):
 
 
 def get_new_id():
+    '''Generates new unique ID number based on the existing data table'''
     story_table = read_csv()
     sorted_ids = sorted([int(row[0]) for row in story_table])
     story_id = 0
@@ -48,10 +51,20 @@ def get_new_id():
     return story_id
 
 
+@app.route('/', methods=['GET'])
+@app.route('/list', methods=['GET'])
+def show_list():
+    '''Render the StoryTable'''
+    story_table = read_csv()
+    story_table = sorted(story_table, key=lambda story_id: int(story_id[0]))
+    return render_template('list.html', story_table=story_table, HEADER_ROW=HEADER_ROW)
+
+
 @app.route('/story', methods=['GET'])
 @app.route('/story/<int:story_id>', methods=['GET'])
 def story(story_id=False):
-    '''Renders the "form.html" with the previous values to update Story Table'''
+    '''Renders the "form.html" with the previous values to update Story Table or 
+    without valuse to create a new row in the StoryTable'''
     if story_id:
         story_table = read_csv()
         story_table = sorted(story_table, key=lambda story_id: int(story_id[0]))
@@ -85,8 +98,21 @@ def story(story_id=False):
                                )
 
 
+@app.route('/delete/<int:story_id>', methods=['GET'])
+def delete(story_id):
+    '''Delete the row from StoryTable according to ID number'''
+    story_table = read_csv()
+    story_table = sorted(story_table, key=lambda story_id: int(story_id[0]))
+    index_list = [int(i[0]) for i in story_table]
+    row_index = index_list.index(story_id)
+    del story_table[row_index]
+    write_csv(story_table)
+    return redirect('/list')
+
+
 @app.route('/story/create/', methods=['POST'])
 def creat():
+    """Update StoryTable with a new row"""
     story_id = get_new_id()
     form_dict = dict(request.form)
     new_row = [story_id,
@@ -105,6 +131,7 @@ def creat():
 
 @app.route('/story/update/<int:story_id>', methods=['POST'])
 def update(story_id):
+    """Update StoryTable with an updated row"""
     story_table = read_csv()
     story_table = sorted(story_table, key=lambda story_id: int(story_id[0]))
     index_list = [int(i[0]) for i in story_table]
@@ -118,27 +145,6 @@ def update(story_id):
     row[6] = str(request.form['status'])
     story_table[row_index] = row
     story_table = sorted(story_table, key=lambda story_id: int(story_id[0]))
-    write_csv(story_table)
-    return redirect('/list')
-
-
-@app.route('/', methods=['GET'])
-@app.route('/list', methods=['GET'])
-def show_list():
-    '''Render the StoryTable'''
-    story_table = read_csv()
-    story_table = sorted(story_table, key=lambda story_id: int(story_id[0]))
-    return render_template('list.html', story_table=story_table, HEADER_ROW=HEADER_ROW)
-
-
-@app.route('/delete/<int:story_id>', methods=['GET'])
-def delete(story_id):
-    '''Delete the row from StoryTable according to ID number'''
-    story_table = read_csv()
-    story_table = sorted(story_table, key=lambda story_id: int(story_id[0]))
-    index_list = [int(i[0]) for i in story_table]
-    row_index = index_list.index(story_id)
-    del story_table[row_index]
     write_csv(story_table)
     return redirect('/list')
 
