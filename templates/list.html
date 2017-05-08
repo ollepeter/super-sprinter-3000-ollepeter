@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<style>
+    table{
+
+        border: 2px solid black;
+        border-collapse: collapse;
+    }
+
+    th {
+        height: 25px;
+        border: 2px solid black;
+        border-collapse: collapse;
+    }
+
+    td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+</style>
+<head>
+    <title>Story Table</title>
+</head>  
+<body>
+    <table>
+        <tr>
+            {% for cell in HEADER_ROW %}
+                <th>{{ cell }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in story_table %}
+        <tr>
+            {% for cell in row %}
+                <td>{{ cell }}</td>
+            {% endfor %}
+            <td style="border:2px solid black; border-collapse: collapse;">   
+                <a href="delete/{{ row[0] }}">
+                    <img src="/static/delete_bin.png" alt="Delete" style="width:16px; height:16px; text-decoration: none;">
+                </a>
+                <a href="story/{{ row[0] }}">
+                    <img src="/static/edit_pen.png" alt="Edit" style="width:16px; height:16px; text-decoration: none;">
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+<form action="/story" method = "GET">
+    <input type="submit" value="Add a new User Story" />
+</form>
+
+</body>
+
+</html>
